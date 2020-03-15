@@ -1,0 +1,54 @@
+kernel:
+  image: dengleros/os-kernel:latest
+#  cmdline: "console=tty0 console=ttyS0 console=ttyAMA0"
+  cmdline: "console=ttyAMA0,115200 console=tty console=ttyS0 highres=off random.trust_cpu=on"
+
+init:
+  - dengleros/os-busybox:latest
+  # default packages from kernel.tar missing?!
+  #  - pwfoo/os-alpine-modules:latest
+  - dengleros/os-cacerts:latest
+  - dengleros/os-crun:latest
+  - dengleros/os-gpm:latest
+  - dengleros/os-rustysd:latest
+
+#onboot:
+        
+services:
+  - name: rngd
+    image: dengleros/rngd:latest
+    capabilities:
+     - all
+    binds:
+     - /lib/modules:/lib/modules
+
+  - name: mdevd
+    image: dengleros/mdevd:latest
+    capabilities:
+    - all
+    binds:
+    - /lib/modules:/lib/modules
+    - /lib/firmware:/lib/firmware
+
+  - name: udhcpc
+    image: dengleros/udhcpc:latest
+    net: host
+    binds:
+    - /etc/resolv.conf:/etc/resolv.conf    
+    capabilities:
+    - CAP_NET_ADMIN
+    - CAP_NET_RAW
+    - CAP_SYS_ADMIN
+
+  - name: sshd
+    image: dengleros/sshd:latest
+    net: host
+    pid: host
+    capabilities:
+    - all
+    binds:
+    - /:/host
+
+#onshutdown
+
+#files
